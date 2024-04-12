@@ -19,4 +19,63 @@ document.addEventListener("DOMContentLoaded", function () {
                             <button onClick="updateTickets(${event.id}, ${event.price})" >Add Tickets</button>`;
     eventsContainer.appendChild(eventDiv);
   });
+
+  window.updateTickets = function (eventId, price) {
+    const input = document.getElementById(`input-${eventId}`);
+    const count = parseInt(input.value, 10);
+
+    if (count < 0) {
+      alert("Please enetr a valid number of tickets");
+      input.value = 0;
+      return;
+    }
+
+    selectedTickets[eventId].count = count;
+    selectedTickets[eventId].total = count * price;
+
+    updateTotal();
+  };
+
+  function updateTotal() {
+    const totalDiv = document.getElementById("selectedTickets");
+    let grandTotal = 0;
+    let summaryHtml = "";
+
+    Object.keys(selectedTickets).forEach((id) => {
+      const ticket = selectedTickets[id];
+      if (ticket.count > 0) {
+        grandTotal += ticket.total;
+        summaryHtml = `<p>${ticket.count} tickets for ${ticket.name} - $${ticket.total}</p>`;
+      }
+    });
+    totalDiv.innerHTML = `Total cost: $${grandTotal}<br>${summaryHtml}`;
+  }
+
+  const bookingForm = document.getElementById("bookingForm");
+  bookingForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const summary = document.getElementById("selectedTickets").innerHTML;
+    if (summary.includes("tickets for")) {
+      alert(
+        `Booking confirmed! Here is your summary:\n\n${summary.replace(
+          /<\/?p>|<br>/g,
+          "\n"
+        )}`
+      );
+    } else {
+      alert("No tickets selected. Please add some tickets before booking.");
+      return;
+    }
+
+    bookingForm.reset();
+
+    document
+      .querySelectorAll('#events input[type="number"]')
+      .forEach((input) => (input.value = 0));
+    Object.keys(selectedTickets).forEach((id) => {
+      selectedTickets[id].count = 0;
+      selectedTickets[id].total = 0;
+    });
+    document.getElementById(("selectedTickets".innerHTML = ""));
+  });
 });
